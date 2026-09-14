@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CodeField from '../components/CodeField.astro';
+import ThemeSeg from '../components/ThemeSeg.astro';
+---
+
+<BaseLayout title="设置" description="站点外观与本机自定义">
+  <section class="container container--prose">
+    <h1 class="page-title">设置</h1>
+    <p class="page-desc">全部偏好只存在本机浏览器，不会上传，也不会影响其他读者。</p>
+
+    <section class="settings-block">
+      <h2>外观</h2>
+      <ThemeSeg />
+    </section>
+
+    <section class="settings-block">
+      <h2>自定义 CSS</h2>
+      <p class="settings-hint">
+        写在下面，保存后仅在你的浏览器生效。会插入到页面样式表最后，同特异性时优先于站点样式。改颜色建议覆盖
+        <code>--color-accent</code>
+        等 CSS 变量。
+      </p>
+      <CodeField
+        id="user-css-input"
+        lang="css"
+        rows={8}
+        placeholder=":root { --color-accent: #5b4b8a; }"
+      />
+    </section>
+
+    <section class="settings-block">
+      <h2>自定义 JS</h2>
+      <p class="settings-hint">页面加载后在你的浏览器执行。只给自己用，不要贴敏感逻辑。</p>
+      <CodeField id="user-js-input" lang="js" rows={8} placeholder="console.log('hello');" />
+    </section>
+
+    <div class="settings-actions">
+      <button type="button" class="settings-btn" id="user-inject-save">保存并应用</button>
+      <button type="button" class="settings-btn settings-btn--ghost" id="user-inject-clear">清空</button>
+      <span class="settings-feedback" id="user-inject-feedback" hidden></span>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import {
+    USER_CSS_KEY,
+    USER_JS_KEY,
+    applyUserCss,
+    clearUserInject,
+    runUserJs,
+    saveUserInject,
+  } from '../lib/client-prefs';
+
+  const cssInput = document.getElementById('user-css-input') as HTMLTextAreaElement | null;
+  const jsInput = document.getElementById('user-js-input') as HTMLTextAreaElement | null;
+  const saveBtn = document.getElementById('user-inject-save');
+  const clearBtn = document.getElementById('user-inject-clear');
+  const feedback = document.getElementById('user-inject-feedback');
+
+  function showFeedback(text: string, ok = true) {
+    if (!feedback) return;
+    feedback.hidden = false;
+    feedback.textContent = text;
+    feedback.dataset.ok = ok ? '1' : '0';
+  }
+
+  function refreshHl() {
+    window.__refreshCodeFields?.();
+  }
+
+  function loadInputs() {
+    if (cssInput) cssInput.value = localStorage.getItem(USER_CSS_KEY) ?? '';
+    if (jsInput) jsInput.value = localStorage.getItem(USER_JS_KEY) ?? '';
+    refreshHl();
+  }
+
+  function onSave() {
+    const css = cssInput?.value ?? '';
+    const js = jsInput?.value ?? '';
+    try {
+      saveUserInject(css, js);
+      if (js.trim()) {
+        try {
+          runUserJs();
+        } catch (err) {
+          showFeedback('JS 已保存，但执行出错：' + (err as Error).message, false);
+          return;
+        }
+      }
+      showFeedback('已保存并应用（仅本机）');
+    } catch (err) {
+      showFeedback('保存失败：' + (err as Error).message, false);
+    }
+  }
+
+  function onClear() {
+    try {
+      clearUserInject();
+    } catch (_) {
+      applyUserCss();
+    }
+    if (cssInput) cssInput.value = '';
+    if (jsInput) jsInput.value = '';
+    refreshHl();
+    showFeedback('已清空');
+  }
+
+  loadInputs();
+  saveBtn?.addEventListener('click', onSave);
+  clearBtn?.addEventListener('click', onClear);
+</script>

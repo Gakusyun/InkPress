@@ -1,0 +1,59 @@
+---
+import { BEIAN_LINKS, SITE } from '../consts';
+
+const year = new Date().getFullYear();
+const icp = SITE.ICP.trim();
+const beian = SITE.publicSecurity.trim();
+const beianLogo = SITE.publicSecurityLogo.trim();
+const hasFiling = Boolean(icp || beian);
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__meta">
+      <span>© {year} {SITE.author}</span>
+      {hasFiling && (
+        <>
+          <span class="site-footer__sep" aria-hidden="true">·</span>
+          {icp && (
+            <a
+              href={BEIAN_LINKS.icp}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {icp}
+            </a>
+          )}
+          {icp && beian && (
+            <span class="site-footer__sep" aria-hidden="true">·</span>
+          )}
+          {beian && (
+            <a
+              class="site-footer__beian"
+              href={BEIAN_LINKS.publicSecurity}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {beianLogo && (
+                <img
+                  class="site-footer__beian-logo"
+                  src={beianLogo}
+                  alt=""
+                  width="16"
+                  height="16"
+                  decoding="async"
+                />
+              )}
+              {beian}
+            </a>
+          )}
+        </>
+      )}
+    </div>
+    <span class="site-footer__links">
+      <a href="/rss.xml">RSS</a>
+      <span aria-hidden="true"> · </span>
+      <a href="/settings">设置</a>
+    </span>
+  </div>
+</footer>

@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TOC from '../../components/TOC.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import { formatDate, getPublishedPosts } from '../../lib/posts';
+import { SITE } from '../../consts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const dateLabel = formatDate(post.data.pubDate, SITE.locale);
+const updatedLabel = post.data.updatedDate
+  ? formatDate(post.data.updatedDate, SITE.locale)
+  : null;
+const hasToc = headings.some((h) => h.depth === 2 || h.depth === 3);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description || post.data.title}>
+  <ReadingProgress />
+  <article class="container">
+    <header class="article-header">
+      <h1>{post.data.title}</h1>
+      <div class="article-meta">
+        <time datetime={post.data.pubDate.toISOString()}>{dateLabel}</time>
+        {updatedLabel && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>更新于 {updatedLabel}</span>
+          </>
+        )}
+        {post.data.tags.length > 0 && (
+          <span class="tag-list">
+            {post.data.tags.map((tag) => (
+              <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>{tag}</a>
+            ))}
+          </span>
+        )}
+      </div>
+    </header>
+
+    <div class={`article-layout${hasToc ? ' article-layout--with-toc' : ''}`}>
+      <div class="prose">
+        <Content />
+      </div>
+      {hasToc && <TOC headings={headings} />}
+    </div>
+  </article>
+</BaseLayout>

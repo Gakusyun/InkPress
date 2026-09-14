@@ -1,0 +1,98 @@
+/* Design tokens — 唯一视觉源。详见 STYLE.md */
+
+:root {
+  color-scheme: light;
+
+  --color-bg: #faf9f7;
+  --color-bg-elevated: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #6e6b66;
+  --color-ink-faint: #9c9892;
+  --color-border: #e7e4df;
+  --color-accent: #1f5c4d;
+  --color-accent-soft: #e6f0ec;
+  --color-prose-code-bg: #f0eeea;
+  --tok-comment: #6e7781;
+  --tok-string: #0a3069;
+  --tok-keyword: #cf222e;
+  --tok-prop: #0550ae;
+  --tok-tag: #8250df;
+  --tok-number: #953800;
+
+  /* 仅使用 FONTS 中声明的字体，见 consts.ts */
+  --font-display: "Source Han Serif SC VF", "Times New Roman", serif;
+  --font-body: "MiSans", "Source Han Serif SC VF", "Times New Roman", serif;
+  --font-mono: "Maple Mono CN", monospace;
+  /* MiSans 静态两档：Medium 380 / Bold 630；标题用思源宋体 VF */
+  --weight-body: 380;
+  --weight-body-bold: 630;
+  --weight-display: 600;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+
+  --measure: 46rem;
+  --width-wide: 56rem;
+  --page-pad: clamp(1rem, 4vw, 2rem);
+  --header-h: 3.5rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-section: clamp(2.5rem, 6vw, 4.5rem);
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --ease: 150ms ease;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #121211;
+  --color-bg-elevated: #1c1c1a;
+  --color-ink: #eceae6;
+  --color-ink-muted: #a8a49c;
+  --color-ink-faint: #6e6a64;
+  --color-border: #2c2b28;
+  --color-accent: #7dbaa6;
+  --color-accent-soft: #1a2e28;
+  --color-prose-code-bg: #252522;
+  --tok-comment: #8b949e;
+  --tok-string: #a5d6ff;
+  --tok-keyword: #ff7b72;
+  --tok-prop: #79c0ff;
+  --tok-tag: #d2a8ff;
+  --tok-number: #ffa657;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    color-scheme: dark;
+
+    --color-bg: #121211;
+    --color-bg-elevated: #1c1c1a;
+    --color-ink: #eceae6;
+    --color-ink-muted: #a8a49c;
+    --color-ink-faint: #6e6a64;
+    --color-border: #2c2b28;
+    --color-accent: #7dbaa6;
+    --color-accent-soft: #1a2e28;
+    --color-prose-code-bg: #252522;
+    --tok-comment: #8b949e;
+    --tok-string: #a5d6ff;
+    --tok-keyword: #ff7b72;
+    --tok-prop: #79c0ff;
+    --tok-tag: #d2a8ff;
+    --tok-number: #ffa657;
+  }
+}

@@ -1,0 +1,26 @@
+---
+interface Props {
+  page: number;
+  totalPages: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+}
+
+const { page, totalPages, hasPrev, hasNext } = Astro.props;
+
+function hrefFor(p: number) {
+  return p <= 1 ? '/' : `/page/${p}`;
+}
+---
+
+{totalPages > 1 && (
+  <nav class="pagination" aria-label="分页">
+    <span>
+      {hasPrev ? <a href={hrefFor(page - 1)} rel="prev">← 较新</a> : <span>← 较新</span>}
+    </span>
+    <span>第 {page} / {totalPages} 页</span>
+    <span>
+      {hasNext ? <a href={hrefFor(page + 1)} rel="next">较早 →</a> : <span>较早 →</span>}
+    </span>
+  </nav>
+)}

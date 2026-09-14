@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostListView from '../../components/PostListView.astro';
+import { getPublishedPosts } from '../../lib/posts';
+import { SITE } from '../../consts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const totalPages = Math.max(1, Math.ceil(posts.length / SITE.pageSize));
+  // page 1 是 /
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => {
+    const page = i + 2;
+    return { params: { page: String(page) }, props: { page } };
+  });
+}
+
+const { page } = Astro.props as { page: number };
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title={`第 ${page} 页`}>
+  <section class="container">
+    <PostListView posts={posts} page={page} pageSize={SITE.pageSize} />
+  </section>
+</BaseLayout>

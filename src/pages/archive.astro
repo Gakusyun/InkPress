@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArchiveView from '../components/ArchiveView.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title="归档" description={`${SITE.title} 全部文章按年归档`}>
+  <ArchiveView />
+</BaseLayout>

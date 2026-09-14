@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { FONTS, SITE, STORAGE_KEYS } from '../consts';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url);
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <title>{pageTitle}</title>
+    {FONTS.css.map((href) => (
+      <link rel="stylesheet" href={href} crossorigin />
+    ))}
+    {FONTS.js.map((src) => (
+      <script is:inline src={src} defer></script>
+    ))}
+    <script is:inline define:vars={{ themeKey: STORAGE_KEYS.theme }}>
+      (function () {
+        try {
+          var stored = localStorage.getItem(themeKey);
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main class="site-main">
+      <slot />
+    </main>
+    <Footer />
+    <script is:inline define:vars={{ userCssKey: STORAGE_KEYS.userCss, userJsKey: STORAGE_KEYS.userJs }}>
+      // 本机注入：逻辑与 src/lib/client-prefs.ts 保持一致（此处必须 is:inline，页面尾立即生效）
+      // 始终把 <style id="user-css"> 插到 <head> 最后，保证级联优先级最高
+      (function () {
+        window.__applyUserCss = function () {
+          try {
+            var css = localStorage.getItem(userCssKey) || '';
+            var el = document.getElementById('user-css');
+            if (!el) {
+              el = document.createElement('style');
+              el.id = 'user-css';
+              el.setAttribute('data-priority', 'user');
+            }
+            if (!css.trim()) {
+              if (el.parentNode) el.parentNode.removeChild(el);
+              return;
+            }
+            el.textContent = css;
+            document.head.appendChild(el);
+          } catch (err) {
+            console.error('[user inject css]', err);
+          }
+        };
+        window.__runUserJs = function () {
+          try {
+            var js = localStorage.getItem(userJsKey);
+            if (js && js.trim()) new Function(js)();
+          } catch (err) {
+            console.error('[user inject js]', err);
+          }
+        };
+        window.__applyUserCss();
+        window.__runUserJs();
+      })();
+    </script>
+  </body>
+</html>

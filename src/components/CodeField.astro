@@ -1,0 +1,60 @@
+---
+interface Props {
+  id: string;
+  lang: 'css' | 'js';
+  rows?: number;
+  placeholder?: string;
+}
+
+const { id, lang, rows = 8, placeholder = '' } = Astro.props;
+---
+
+<div class="code-field" data-code-field data-lang={lang}>
+  <pre class="code-field__hl" aria-hidden="true"><code data-code-hl></code></pre>
+  <textarea
+    class="code-field__input"
+    id={id}
+    rows={rows}
+    spellcheck="false"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
+    placeholder={placeholder}
+  ></textarea>
+</div>
+
+<script>
+  import { highlightCode, type HighlightLang } from '../lib/highlight';
+
+  function refreshField(field: HTMLElement) {
+    const lang = (field.dataset.lang || 'css') as HighlightLang;
+    const ta = field.querySelector('textarea');
+    const code = field.querySelector<HTMLElement>('[data-code-hl]');
+    if (!ta || !code) return;
+    code.innerHTML = highlightCode(ta.value, lang) + '\n';
+  }
+
+  function bindField(field: HTMLElement) {
+    const ta = field.querySelector('textarea');
+    if (!ta) return;
+    ta.addEventListener('input', () => refreshField(field));
+    ta.addEventListener('scroll', () => {
+      const pre = field.querySelector<HTMLElement>('.code-field__hl');
+      if (pre) {
+        pre.scrollTop = ta.scrollTop;
+        pre.scrollLeft = ta.scrollLeft;
+      }
+    });
+    refreshField(field);
+  }
+
+  document.querySelectorAll('[data-code-field]').forEach((el) => {
+    if (el instanceof HTMLElement) bindField(el);
+  });
+
+  window.__refreshCodeFields = () => {
+    document.querySelectorAll('[data-code-field]').forEach((el) => {
+      if (el instanceof HTMLElement) refreshField(el);
+    });
+  };
+</script>

@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostListView from '../components/PostListView.astro';
+import { getPublishedPosts } from '../lib/posts';
+import { SITE } from '../consts';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout>
+  <section class="container">
+    <PostListView
+      posts={posts}
+      page={1}
+      pageSize={SITE.pageSize}
+      emptyMessage="还没有文章。在 src/content/posts/ 新建 Markdown 即可。"
+    />
+  </section>
+</BaseLayout>

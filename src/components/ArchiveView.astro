@@ -1,0 +1,82 @@
+---
+import { formatDate, getAllTags, getPublishedPosts, groupPostsByYear } from '../lib/posts';
+import { SITE } from '../consts';
+
+interface Props {
+  selectedTag?: string;
+}
+
+const { selectedTag } = Astro.props;
+const allPosts = await getPublishedPosts();
+const tags = getAllTags(allPosts);
+const posts = selectedTag
+  ? allPosts.filter((p) => p.data.tags.includes(selectedTag))
+  : allPosts;
+const groups = groupPostsByYear(posts);
+const activeTags = new Set(selectedTag ? [selectedTag] : []);
+---
+
+<section class="container">
+  {tags.length > 0 && (
+    <div class="archive-tags" aria-label="按标签筛选">
+      {selectedTag ? (
+        <a class="tag tag--lg" href="/archive">全部</a>
+      ) : (
+        <span class="tag tag--lg is-active" aria-current="true">全部</span>
+      )}
+      {tags.map(({ tag, count }) =>
+        activeTags.has(tag) ? (
+          <a
+            class="tag tag--lg is-active"
+            href="/archive"
+            title="再点一次取消筛选"
+          >
+            {tag}
+            <span class="tag__count">{count}</span>
+          </a>
+        ) : (
+          <a class="tag tag--lg" href={`/tags/${encodeURIComponent(tag)}`}>
+            {tag}
+            <span class="tag__count">{count}</span>
+          </a>
+        )
+      )}
+    </div>
+  )}
+
+  {groups.length === 0 ? (
+    <p class="empty-state">还没有文章。</p>
+  ) : (
+    groups.map(({ year, posts: yearPosts }) => (
+      <section class="archive-year-block">
+        <h2 class="archive-year">{year}</h2>
+        <ul class="archive-list">
+          {yearPosts.map((post) => (
+            <li>
+              <div class="archive-list__main">
+                <a class="archive-list__title" href={`/posts/${post.id}`}>
+                  {post.data.title}
+                </a>
+                {post.data.tags.length > 0 && (
+                  <span class="archive-list__tags">
+                    {post.data.tags.map((t) => (
+                      <a
+                        class:list={['tag', activeTags.has(t) && 'is-active']}
+                        href={activeTags.has(t) ? '/archive' : `/tags/${encodeURIComponent(t)}`}
+                      >
+                        {t}
+                      </a>
+                    ))}
+                  </span>
+                )}
+              </div>
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatDate(post.data.pubDate, SITE.locale)}
+              </time>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  )}
+</section>

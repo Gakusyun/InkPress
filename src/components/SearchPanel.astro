@@ -1,0 +1,140 @@
+---
+/** 空壳弹层：索引在打开时从 /search-index.json 拉取 */
+---
+
+<div class="search-overlay" id="search-overlay" hidden>
+  <div class="search-overlay__backdrop" data-search-close></div>
+  <div
+    class="search-overlay__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="搜索文章"
+  >
+    <div class="search-overlay__bar">
+      <input
+        type="search"
+        id="site-search-input"
+        placeholder="搜索标题、标签、正文或拼音…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="search-overlay__close" data-search-close aria-label="关闭搜索">
+        Esc
+      </button>
+    </div>
+    <p class="search-overlay__status" id="site-search-status">加载索引…</p>
+    <ul class="search-overlay__results" id="site-search-results"></ul>
+  </div>
+</div>
+
+<script>
+  import type { SearchDoc } from '../lib/search';
+  import { escapeHtml, searchDocs } from '../lib/client-search';
+
+  const overlay = document.getElementById('search-overlay');
+  const input = document.getElementById('site-search-input') as HTMLInputElement | null;
+  const resultsEl = document.getElementById('site-search-results');
+  const statusEl = document.getElementById('site-search-status');
+
+  if (overlay && input && resultsEl && statusEl) {
+    let docs: SearchDoc[] | null = null;
+    let lastFocus: Element | null = null;
+    let loading: Promise<SearchDoc[]> | null = null;
+
+    function render(items: SearchDoc[], query: string) {
+      if (!query.trim()) {
+        statusEl!.textContent = `索引 ${docs?.length ?? 0} 篇，输入关键词搜索`;
+        resultsEl!.innerHTML = '';
+        return;
+      }
+      if (items.length === 0) {
+        statusEl!.textContent = `没有找到「${query}」`;
+        resultsEl!.innerHTML = '';
+        return;
+      }
+      statusEl!.textContent = `${items.length} 条结果`;
+      resultsEl!.innerHTML = items
+        .map(
+          (d) => `
+        <li>
+          <a href="${d.url}">
+            <span class="search-overlay__hit-title">${escapeHtml(d.title)}</span>
+            <span class="search-overlay__hit-desc">${escapeHtml(d.description || '')}</span>
+            ${d.tags.length ? `<span class="search-overlay__hit-tags">${d.tags.map((t) => escapeHtml(t)).join(' · ')}</span>` : ''}
+          </a>
+        </li>`,
+        )
+        .join('');
+    }
+
+    function search() {
+      if (!docs) return;
+      render(searchDocs(docs, input!.value), input!.value);
+    }
+
+    function ensureIndex(): Promise<SearchDoc[]> {
+      if (docs) return Promise.resolve(docs);
+      if (loading) return loading;
+      loading = fetch('/search-index.json')
+        .then((r) => {
+          if (!r.ok) throw new Error('index load failed');
+          return r.json() as Promise<SearchDoc[]>;
+        })
+        .then((data) => {
+          docs = data;
+          return data;
+        })
+        .catch(() => {
+          loading = null;
+          statusEl!.textContent = '索引加载失败';
+          return [] as SearchDoc[];
+        });
+      return loading;
+    }
+
+    function open() {
+      lastFocus = document.activeElement;
+      overlay!.hidden = false;
+      document.documentElement.classList.add('search-open');
+      input!.value = '';
+      resultsEl!.innerHTML = '';
+      statusEl!.textContent = '加载索引…';
+      ensureIndex().then(() => {
+        search();
+        input!.focus();
+      });
+    }
+
+    function close() {
+      overlay!.hidden = true;
+      document.documentElement.classList.remove('search-open');
+      if (lastFocus instanceof HTMLElement) lastFocus.focus();
+    }
+
+    document.querySelectorAll('[data-search-open]').forEach((btn) => {
+      btn.addEventListener('click', open);
+    });
+    overlay.querySelectorAll('[data-search-close]').forEach((el) => {
+      el.addEventListener('click', close);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const typing =
+        e.target instanceof HTMLElement &&
+        (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (
+        (e.key === 'k' && (e.metaKey || e.ctrlKey)) ||
+        (e.key === '/' && !typing && overlay.hidden)
+      ) {
+        e.preventDefault();
+        if (overlay.hidden) open();
+      }
+      if (e.key === 'Escape' && !overlay.hidden) {
+        e.preventDefault();
+        close();
+      }
+    });
+
+    input.addEventListener('input', search);
+  }
+</script>

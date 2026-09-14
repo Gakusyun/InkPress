@@ -1,0 +1,41 @@
+---
+import { SITE } from '../consts';
+import SearchPanel from './SearchPanel.astro';
+
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const links = [
+  { href: '/', label: '文章' },
+  { href: '/archive', label: '归档' },
+];
+
+function isCurrent(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="/">{SITE.title}</a>
+    <nav class="site-header__nav" aria-label="主导航">
+      {links.map((link) => (
+        <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      ))}
+      <button
+        class="header-search-btn"
+        type="button"
+        aria-label="打开搜索"
+        data-search-open
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6" />
+          <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<SearchPanel />

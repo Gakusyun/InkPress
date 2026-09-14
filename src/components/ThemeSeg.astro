@@ -1,0 +1,16 @@
+---
+/**
+ * 主题分段控件。脚本复用 lib/client-prefs。
+ */
+---
+
+<div class="theme-seg" data-theme-seg>
+  <button type="button" data-theme-set="system">跟随系统</button>
+  <button type="button" data-theme-set="light">亮色</button>
+  <button type="button" data-theme-set="dark">暗色</button>
+</div>
+
+<script>
+  import { bindThemeControls } from '../lib/client-prefs';
+  bindThemeControls();
+</script>

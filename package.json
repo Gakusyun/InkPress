@@ -1,0 +1,21 @@
+{
+  "name": "inkpress",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "墨刊 InkPress — 基于 Astro 的极简编辑部风格静态博客框架",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.12",
+    "astro": "^7.3.2",
+    "pinyin-pro": "^3.29.4"
+  }
+}
