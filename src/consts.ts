@@ -11,8 +11,6 @@ export const SITE = {
   lang: 'zh-CN',
   /** 首页每页文章数 */
   pageSize: 8,
-  /** 正文两端对齐（text-align: justify），仅作用于段落 */
-  justify: false,
   locale: 'zh-CN',
   /** ICP 备案号，例如「京ICP备xxxxxxxx号」；留空则底栏不显示 */
   ICP: '',

@@ -47,7 +47,7 @@ const hasToc = headings.some((h) => h.depth === 2 || h.depth === 3);
     </header>
 
     <div class={`article-layout${hasToc ? ' article-layout--with-toc' : ''}`}>
-      <div class:list={['prose', { 'prose--justify': SITE.justify }]}>
+      <div class="prose">
         <Content />
       </div>
       {hasToc && <TOC headings={headings} />}
