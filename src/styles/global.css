@@ -582,6 +582,7 @@ span.tag.is-active {
 
 .prose p {
   margin: 0 0 1.15em;
+  text-align: justify;
 }
 
 .prose ul,
